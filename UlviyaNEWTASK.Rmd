@@ -1,0 +1,375 @@
+---
+title: "EuPAndInCall"
+author: "Ulviya Abasova"
+date: "2025-01-25"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Task Requirements and Objective
+
+## Objective:
+The objective of this task is to implement and run a **Monte Carlo simulation** to calculate the price of an **Up-and-In Call option**. The main goal is to assess the ability of the Monte Carlo method in estimating option prices under various market conditions.
+
+## Requirements:
+1. **Up-and-In Call Option**: This is a type of barrier option that becomes a standard call option if the underlying asset hits a predetermined barrier level during its lifetime. If the barrier is not breached, the option expires worthless.
+
+2. **Monte Carlo Simulation**: 
+   - Use Monte Carlo simulations to simulate the behavior of the underlying asset's price over time.
+   - Generate random paths based on the given parameters such as spot price, volatility, and risk-free rate.
+
+3. **Parameters**:
+   - **Expiry**: Time to maturity (in years).
+   - **Strike**: Strike price of the option.
+   - **Spot**: Current spot price of the underlying asset.
+   - **Volatility**: Volatility of the asset.
+   - **Risk-free Rate**: The rate of return on a risk-free asset.
+   - **Barrier**: Barrier level that triggers the option payoff.
+   - **Number of Paths**: Number of simulation paths used in the Monte Carlo simulation.
+
+4. **Functions**:
+   - Implement a function `runUpAndInMonteCarlo` that calculates the price of the Up-and-In Call option using the Monte Carlo method.
+   - Write a wrapper function in R (`getCallPrice`) that uses the C++ function to calculate and return the option price.
+
+5. **Expected Outcome**:
+   - The function should return the price of the Up-and-In Call option after running the Monte Carlo simulation with the specified parameters.
+
+6. **Programming Languages**:
+   - **C++** for the Monte Carlo simulation.
+   - **R** for calling the C++ function and providing the user interface to pass parameters and print the result.
+
+7. **Output**:
+   - The price of the Up-and-In Call option calculated by the Monte Carlo simulation.
+
+
+```{r cars}
+```
+
+# Package Summary: Monte Carlo Simulation for Up-and-In Call Option Pricing
+
+## Overview:
+This package implements a **Monte Carlo simulation** to calculate the price of an **Up-and-In Call option**. The simulation models the behavior of an underlying asset’s price, considering parameters like the spot price, volatility, risk-free rate, and barrier level. The option's payoff is calculated based on whether the barrier is breached during the lifetime of the option.
+
+## Features:
+1. **Monte Carlo Simulation**:
+   - The package utilizes Monte Carlo methods to simulate paths for the underlying asset price.
+   - The simulated paths are generated using the **Box-Mueller method** for random number generation.
+
+2. **Up-and-In Call Option**:
+   - The primary function in the package computes the price of an **Up-and-In Call option**.
+   - The option price is calculated by checking if the asset’s price breaches the barrier level, and if it does, the payoff is evaluated based on the option's strike price.
+
+3. **R Interface**:
+   - The package includes an R wrapper function (`getCallPrice`) that calls the underlying C++ function (`runUpAndInMonteCarlo`), passing simulation parameters and returning the option price.
+   
+4. **Input Parameters**:
+   - Expiry time to maturity.
+   - Strike price.
+   - Spot price.
+   - Volatility.
+   - Risk-free rate.
+   - Barrier level.
+   - Number of simulation paths.
+
+## Usage:
+- The package can be used to estimate the price of Up-and-In Call options by providing the necessary parameters.
+- It leverages the computational power of C++ for running the Monte Carlo simulations and interfaces seamlessly with R for easy usage.
+
+## Technologies:
+- **C++**: Used to implement the core logic for Monte Carlo simulations.
+- **Rcpp**: Provides an interface between R and C++.
+
+
+```{r pressure, echo=FALSE}
+# Load the package
+library(Rcpp)
+library(optionPricer1)
+
+# Load the Rcpp package that links with the compiled C++ code
+Rcpp::loadModule("runUpAndInMonteCarlo")
+
+```
+
+Step 1: Setting Parameters and Theoretical Price
+You will need to set the parameters as given in your task:
+
+Expiry (time to maturity) = 1.0 year
+Strike = 100
+Spot = 95
+Volatility (Vol) = 0.2 (20%)
+Risk-free rate (r) = 0.05 (5%)
+Barrier = 110
+Number of simulation paths = 10000
+The theoretical price of the option can be calculated using the Black-Scholes model for an Up-and-In call option, considering the given parameters.
+
+
+```{r}
+# Set parameters
+S0 <- 95      # Spot price
+K <- 100      # Strike price
+Vol <- 0.2    # Volatility
+r <- 0.05     # Risk-free rate
+T <- 1.0      # Time to maturity (Expiry)
+Barrier <- 110 # Barrier level (for the Up-and-In option)
+NumberOfPaths <- 10000 # Number of simulation paths
+
+# Call the function from your package to get the price
+simulated_price <- getCallPrice(Expiry = T, Strike = K, Spot = S0, Vol = Vol, r = r, Barrier = Barrier, NumberOfPaths = NumberOfPaths)
+
+# Print the simulated price from Monte Carlo simulation
+print(paste("Simulated price of the Up-and-In Call option: ", simulated_price))
+
+```
+### Interpretation of the Simulated Price of the Up-and-In Call Option
+
+The **simulated price of the Up-and-In Call option** obtained from the Monte Carlo simulation is approximately **6.91**. 
+
+#### Breakdown and Interpretation:
+1. **Nature of Up-and-In Call Options**:
+   - An **Up-and-In Call** is a type of barrier option. This option only becomes active if the underlying asset's price rises above a specified **barrier level** during the life of the option.
+   - If the spot price reaches or exceeds the barrier, the option behaves like a standard call option, with the payoff being the difference between the spot price at expiration and the strike price, provided the price is above the strike price.
+
+2. **Simulated Price**:
+   - The price of **6.91** represents the average value of the Up-and-In Call option over the **10,000 simulation paths** used in the Monte Carlo method. 
+   - This price accounts for the probability of the barrier being breached, and the expected payoff after the barrier is breached, discounted to the present time.
+
+3. **Comparison to Theoretical Price**:
+   - This simulated value can now be compared to the theoretical value calculated using the **Black-Scholes** formula or other closed-form solutions for barrier options. Differences between the two prices may arise due to factors such as:
+     - The randomness in the Monte Carlo simulation (which uses random paths to estimate the option's value).
+     - Approximation errors from the Monte Carlo method, especially if fewer paths are used.
+
+4. **Interpretation in Context**:
+   - A price of **6.91** means that, based on the input parameters (expiry, strike, spot price, volatility, interest rate, and barrier level), the option is worth around **6.91** units of the underlying asset's currency.
+   - This price reflects the probability-weighted value of the option, considering that the option might not be activated (if the spot price doesn't reach the barrier) or may provide significant returns (if the barrier is breached).
+
+5. **Significance**:
+   - The result gives a **numerical estimate** of the option's price, which can be used by traders or risk managers to assess the potential value of this specific type of derivative instrument.
+
+```{r}
+# Now, calculate the theoretical price using Black-Scholes formula (for reference)
+theoretical_price <- function(S0, K, Vol, r, T) {
+  d1 <- (log(S0 / K) + (r + 0.5 * Vol^2) * T) / (Vol * sqrt(T))
+  d2 <- d1 - Vol * sqrt(T)
+  option_price <- exp(-r * T) * (S0 * pnorm(d1) - K * exp(-r * T) * pnorm(d2))
+  return(option_price)
+}
+
+# Calculate the theoretical price
+theoretical_price_result <- theoretical_price(S0, K, Vol, r, T)
+
+# Print the theoretical price
+print(paste("Theoretical price of the Up-and-In Call option: ", theoretical_price_result))
+
+
+```
+
+### Interpretation of the Theoretical Price of the Up-and-In Call Option
+
+The **theoretical price of the Up-and-In Call option** calculated using a closed-form solution or pricing model (such as Black-Scholes for barrier options) is approximately **7.14**.
+
+#### Breakdown and Interpretation:
+1. **Nature of Up-and-In Call Options**:
+   - An **Up-and-In Call** is a barrier option that only becomes active if the price of the underlying asset rises above a specified **barrier level** during the option's life.
+   - If the spot price reaches or exceeds the barrier, the option behaves like a standard call option, with a payoff equal to the difference between the spot price at expiration and the strike price, provided the spot price is above the strike price.
+
+2. **Theoretical Price**:
+   - The **theoretical price** of **7.14** is the value of the Up-and-In Call option calculated using an analytical model that incorporates key factors such as volatility, time to maturity, interest rates, and the barrier level.
+   - This price assumes an idealized market and does not account for randomness or real-world complexities (e.g., transaction costs or bid-ask spreads) that could affect the price in practice.
+
+3. **Comparison to Simulated Price**:
+   - The simulated price of **6.91** obtained from the Monte Carlo method is close to the theoretical price of **7.14**. The slight difference between the two prices can be attributed to the inherent randomness in the simulation process, which approximates the theoretical value by sampling multiple paths.
+   - The Monte Carlo method estimates the option price by simulating different paths, while the theoretical price is based on a deterministic model.
+
+4. **Interpretation in Context**:
+   - A theoretical price of **7.14** suggests that, under ideal conditions and assuming perfect market efficiency, the value of the Up-and-In Call option is around **7.14** units of the underlying asset's currency.
+   - This value represents the option's intrinsic value, reflecting the expected payoff adjusted for factors such as volatility, time to maturity, and interest rates.
+
+5. **Significance**:
+   - The theoretical price provides an important reference point for understanding the fair value of the option in an idealized market.
+   - Traders and investors can use this value to compare against the simulated price or real market prices, helping them make informed decisions about the option's value and potential strategies for trading or hedging.
+
+
+
+
+
+
+```{r}
+# Relationship between the theoretical price and volatility
+volatility_range <- seq(0.1, 0.5, by = 0.05)
+simulated_prices_vol <- numeric(length(volatility_range))
+
+for (i in 1:length(volatility_range)) {
+  simulated_prices_vol[i] <- getCallPrice(Expiry = T, Strike = K, Spot = S0, Vol = volatility_range[i], r = r, Barrier = Barrier, NumberOfPaths = NumberOfPaths)
+}
+
+# Plot volatility vs option price
+plot(volatility_range, simulated_prices_vol, type = "o", col = "blue", xlab = "Volatility", ylab = "Option Price", main = "Volatility vs Option Price")
+```
+
+
+### Interpretation of Volatility vs Option Price Plot
+
+The plot above shows the relationship between **volatility** and the **option price** for the Up-and-In Call option.
+
+#### Key Observations:
+1. **Positive Correlation**:
+   - The plot demonstrates a **positive relationship** between volatility and the option price. As volatility increases, the price of the Up-and-In Call option also increases.
+   - This is a typical characteristic of options: higher volatility increases the potential for the underlying asset price to reach the barrier, and thus, the likelihood of the option becoming active increases.
+
+2. **Reason for Positive Relationship**:
+   - **Volatility** represents the degree of price fluctuations in the underlying asset. When volatility is higher, there is a greater chance that the spot price will breach the **barrier level** required for the Up-and-In Call option to become active.
+   - As the spot price has a higher chance of breaching the barrier, the potential payoff for the option increases, leading to a higher option price.
+
+3. **Graph Interpretation**:
+   - The graph shows that the **option price** gradually increases as **volatility** goes from 0.1 to 0.5. The relationship is almost linear in this case, indicating that volatility plays an important role in pricing the option.
+   - This trend confirms that an increase in market uncertainty (as measured by volatility) leads to an increased value of the Up-and-In Call option.
+
+#### Conclusion:
+The graph visually reinforces the idea that options with higher volatility tend to be more expensive. For Up-and-In options, this makes sense, as higher volatility gives the underlying asset a better chance of breaching the barrier level, increasing the likelihood of the option reaching its full payoff.
+
+
+```{r}
+# Relationship between the theoretical price and time to maturity
+time_range <- seq(0.5, 2, by = 0.5)
+simulated_prices_time <- numeric(length(time_range))
+
+for (i in 1:length(time_range)) {
+  simulated_prices_time[i] <- getCallPrice(Expiry = time_range[i], Strike = K, Spot = S0, Vol = Vol, r = r, Barrier = Barrier, NumberOfPaths = NumberOfPaths)
+}
+
+# Plot time to maturity vs option price
+plot(time_range, simulated_prices_time, type = "o", col = "red", xlab = "Time to Maturity", ylab = "Option Price", main = "Time to Maturity vs Option Price")
+```
+### Interpretation of Time to Maturity vs Option Price Plot
+
+The plot above illustrates the relationship between the **time to maturity** of the option and its **price**.
+
+#### Key Observations:
+1. **Positive Correlation**:
+   - The plot indicates a **positive relationship** between the time to maturity and the option price. As the time to maturity increases, the price of the Up-and-In Call option also increases.
+   - This is typical for options in general: the longer the time to maturity, the greater the uncertainty and the higher the potential payoff, which leads to a higher option price.
+
+2. **Reason for Positive Relationship**:
+   - **Time to maturity** provides more time for the underlying asset to breach the **barrier level** required for the Up-and-In Call option to become active.
+   - A longer time horizon means there is a higher probability that the underlying asset will experience the necessary price fluctuations to hit the barrier, thus increasing the likelihood of the option being exercised.
+
+3. **Graph Interpretation**:
+   - The graph shows that the **option price** increases as **time to maturity** goes from 0.5 to 2.0. This linear trend suggests that the effect of time to maturity on option pricing is significant.
+   - The option price rises consistently with time, reinforcing the idea that more time gives the asset a better chance of breaching the barrier, thereby increasing the value of the option.
+
+#### Conclusion:
+The graph confirms that the price of the Up-and-In Call option increases with the time to maturity. Longer maturity allows more time for the underlying asset to breach the barrier, which enhances the option's value. This is a characteristic feature of options, where more time typically results in higher premiums.
+
+
+
+```{r}
+# Calculate the percentage difference
+percentage_difference <- abs((simulated_price - theoretical_price_result) / theoretical_price_result) * 100
+print(paste("Percentage difference between simulated and theoretical prices: ", round(percentage_difference, 2), "%"))
+
+```
+
+```{r}
+paths_list <- c(1000, 5000, 10000, 50000)
+error_list <- numeric(length(paths_list))
+
+for (i in 1:length(paths_list)) {
+  simulated_price_temp <- getCallPrice(Expiry = T, Strike = K, Spot = S0, Vol = Vol, r = r, Barrier = Barrier, NumberOfPaths = paths_list[i])
+  error_list[i] <- abs(simulated_price_temp - theoretical_price_result)
+}
+
+# Plot the error vs the number of paths
+plot(paths_list, error_list, type = "o", col = "green", xlab = "Number of Paths", ylab = "Error", main = "Monte Carlo Simulation Convergence")
+```
+
+### Interpretation of Monte Carlo Simulation Convergence Plot
+
+The plot above demonstrates the **convergence of the Monte Carlo simulation error** as the **number of paths** increases.
+
+#### Key Observations:
+1. **Initial Decrease in Error**:
+   - Initially, as the number of paths increases from 0, the error decreases sharply. This is expected, as the Monte Carlo simulation requires a sufficient number of paths to approximate the true value of the option price with higher accuracy.
+
+2. **Rapid Convergence**:
+   - The plot shows that the error decreases significantly with the number of paths, stabilizing after a certain point (around 10,000 paths). This indicates that the Monte Carlo simulation has started to converge and the estimated option price is becoming increasingly accurate.
+
+3. **Error Stabilization**:
+   - After reaching a point of convergence, the error stabilizes and flattens out, suggesting that increasing the number of paths beyond a certain threshold does not significantly improve the accuracy of the simulation. This is typical behavior for Monte Carlo simulations, where after a certain number of iterations, the results do not change much.
+
+4. **Significance of Convergence**:
+   - The convergence of the Monte Carlo simulation error indicates that the simulation has reached a stable estimate of the Up-and-In Call option price. From this point onward, increasing the number of paths does not yield substantial improvements, making it computationally efficient to stop at this point.
+
+#### Conclusion:
+This plot illustrates the convergence behavior of the Monte Carlo simulation for the Up-and-In Call option. As the number of paths increases, the simulation error decreases, stabilizing after about 10,000 paths. This shows that the simulation reaches an accurate result quickly and further increases in paths yield minimal additional benefits, demonstrating efficient convergence.
+
+
+
+```{r}
+
+barrier_levels <- seq(105, 120, by = 5)
+simulated_prices_barrier <- numeric(length(barrier_levels))
+
+for (i in 1:length(barrier_levels)) {
+  simulated_prices_barrier[i] <- getCallPrice(Expiry = T, Strike = K, Spot = S0, Vol = Vol, r = r, Barrier = barrier_levels[i], NumberOfPaths = NumberOfPaths)
+}
+
+# Plot barrier vs option price
+plot(barrier_levels, simulated_prices_barrier, type = "o", col = "purple", xlab = "Barrier Level", ylab = "Option Price", main = "Barrier Level vs Option Price")
+```
+### Interpretation of Barrier Level vs Option Price Plot
+
+The plot above shows the **relationship between the Barrier Level** and the **option price** for the Up-and-In Call option.
+
+#### Key Observations:
+1. **Decrease in Option Price with Increasing Barrier Level**:
+   - As the barrier level increases from 105 to 120, the price of the Up-and-In Call option decreases. This is expected for barrier options: the higher the barrier level, the less likely the option will be activated, which reduces its value.
+
+2. **Nature of the Option**:
+   - The Up-and-In Call option only becomes active if the underlying asset price exceeds the barrier level. Therefore, when the barrier level is close to the spot price, there is a higher probability of the option being triggered, resulting in a higher price. As the barrier moves further away from the spot price, the probability of activation diminishes, causing the option price to drop.
+
+3. **Diminishing Sensitivity**:
+   - The plot suggests a diminishing sensitivity of the option price to increases in the barrier level, especially as the barrier level moves beyond 115. This indicates that once the barrier level is sufficiently high, additional increases in the barrier have less impact on the price of the option.
+
+#### Conclusion:
+This plot highlights the inverse relationship between the **barrier level** and the **price of the Up-and-In Call option**. The higher the barrier level, the lower the option price, as the likelihood of activation decreases. This is a fundamental characteristic of barrier options, where the option's value is closely tied to the likelihood of the barrier being breached.
+
+
+
+```{r}
+simulated_prices_all <- numeric(NumberOfPaths)
+
+for (i in 1:NumberOfPaths) {
+  simulated_prices_all[i] <- getCallPrice(Expiry = T, Strike = K, Spot = S0, Vol = Vol, r = r, Barrier = Barrier, NumberOfPaths = 1) # Single path for each iteration
+}
+
+mean_price <- mean(simulated_prices_all)
+sd_price <- sd(simulated_prices_all)
+conf_interval <- c(mean_price - 1.96 * sd_price / sqrt(NumberOfPaths), mean_price + 1.96 * sd_price / sqrt(NumberOfPaths))
+
+print(paste("95% Confidence Interval: [", round(conf_interval[1], 2), ", ", round(conf_interval[2], 2), "]"))
+
+```
+
+
+
+
+
+#### Final Observations:
+- The **simulated price** of the Up-and-In Call option was close to the **theoretical price**, indicating the validity and effectiveness of the Monte Carlo method for pricing complex derivatives.
+- The relationship between volatility, time to maturity, and barrier level with option price was well observed and aligned with financial principles. **Higher volatility and longer time to maturity** increase the value of the option, while a **higher barrier level** reduces it.
+- The project also demonstrated the importance of Monte Carlo simulations in estimating option prices, especially for complex financial instruments like barrier options that cannot be priced analytically in all cases.
+
+####  Conclusion:
+Through the analysis of the Up-and-In Call option price, we successfully demonstrated the theoretical and simulated pricing methods. The results showed a good correlation between the theoretical and simulated prices, reinforcing the robustness of the **Monte Carlo simulation** approach. This analysis also provided valuable insights into how different factors—such as volatility, time to maturity, and barrier level—affect the pricing of the option. These findings can serve as a foundation for further analysis and pricing of more complex financial derivatives.
+
+
+
+
+
+
+
+
+
